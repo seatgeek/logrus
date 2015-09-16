@@ -100,7 +100,13 @@ func (hook *SentryHook) Fire(entry *logrus.Entry) error {
 	packet := raven.NewPacket(entry.Message)
 	packet.Timestamp = raven.Timestamp(entry.Time)
 	packet.Level = severityMap[entry.Level]
-
+	packet.Interfaces = append(
+		packet.Interfaces,
+		raven.NewException(
+			errors.New(entry.Message),
+			raven.NewStacktrace(1, 3, nil),
+		),
+	)
 	d := entry.Data
 
 	if logger, ok := getAndDel(d, "logger"); ok {
