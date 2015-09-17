@@ -2,6 +2,7 @@ package logrus_sentry
 
 import (
 	"fmt"
+	"errors"
 	"net/http"
 	"time"
 
