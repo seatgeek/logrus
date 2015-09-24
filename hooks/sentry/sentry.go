@@ -1,8 +1,8 @@
 package logrus_sentry
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -105,7 +105,7 @@ func (hook *SentryHook) Fire(entry *logrus.Entry) error {
 		packet.Interfaces,
 		raven.NewException(
 			errors.New(entry.Message),
-			raven.NewStacktrace(1, 3, nil),
+			raven.NewStacktrace(4, 10, nil),
 		),
 	)
 	d := entry.Data
