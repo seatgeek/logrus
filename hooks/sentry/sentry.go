@@ -61,8 +61,9 @@ type SentryHook struct {
 	// consider the message correctly sent
 	Timeout time.Duration
 
-	client *raven.Client
-	levels []logrus.Level
+	client             *raven.Client
+	levels             []logrus.Level
+	appPackagePrefixes []string
 }
 
 // NewSentryHook creates a hook to be added to an instance of logger
@@ -89,8 +90,13 @@ func NewWithTagsSentryHook(DSN string, tags map[string]string, levels []logrus.L
 
 // NewWithClientSentryHook creates a hook using an initialized raven client.
 // This method sets the timeout to 100 milliseconds.
-func NewWithClientSentryHook(client *raven.Client, levels []logrus.Level) (*SentryHook, error) {
-	return &SentryHook{100 * time.Millisecond, client, levels}, nil
+func NewWithClientSentryHook(client *raven.Client, levels []logrus.Level, appPackagePrefixes []string) (*SentryHook, error) {
+	return &SentryHook{
+		Timeout:            100 * time.Millisecond,
+		client:             client,
+		levels:             levels,
+		appPackagePrefixes: appPackagePrefixes,
+	}, nil
 }
 
 // Called when an event should be sent to sentry
@@ -105,7 +111,7 @@ func (hook *SentryHook) Fire(entry *logrus.Entry) error {
 		packet.Interfaces,
 		raven.NewException(
 			errors.New(entry.Message),
-			raven.NewStacktrace(4, 10, nil),
+			raven.NewStacktrace(1, 10, hook.appPackagePrefixes),
 		),
 	)
 	d := entry.Data
